@@ -124,7 +124,7 @@ ImageN introduces two different types of graphs: rendered and renderable.
 
 > **Note:** The following two sections, \"[Rendered
 Graphs](#331-rendered-graphs)\" and \"[Renderable
-Graphs](#332=renderable-graphs),\" are for advanced ImageN
+Graphs](#332-renderable-graphs),\" are for advanced ImageN
 users. Most programmers will use ImageN\'s Rendered mode and don\'t
 really need to know about the Renderable mode.
 
@@ -163,7 +163,7 @@ constant images and then adds them together.
 {% include src/AddExample.java %}
 ```
 
-The first three lines of the example code specify which classes to
+The first four lines of the example code specify which classes to
 import. The classes prefixed with `org.eclipse.imagen` are the Eclipse ImageN classes. The `java.awt` prefix specifies the core Java API
 classes.
 
@@ -171,6 +171,7 @@ classes.
 import org.eclipse.imagen.*;
 import org.eclipse.imagen.widget.*;
 import java.awt.Frame;
+import java.awt.image.renderable.ParameterBlock;
 ```
 
 The next line declares the name of the program and that it runs in a
@@ -269,12 +270,12 @@ entire class definition.
 
 ```java
   // Get rendered source object from a TIFF source.
-  // The ParameterBlock `pb0' contains the name
-  // of the source (file, URL, etc.). The objects `hints0',
+  // The ParameterBlockImageN `pb0' contains the
+  // source (file, URL, etc.). The objects `hints0',
   // `hints1', and `hints2' contain rendering hints and are
   // assumed to be created outside of this code fragment.
   RenderedOp sourceImg = 
-            ImageN.create("TIFF", pb0);
+            ImageN.create("ImageRead", pb0);
 
   // Derive the RenderableImage from the source RenderedImage.
   ParameterBlock pb = new ParameterBlock();
@@ -312,12 +313,12 @@ entire class definition.
   imagePanel1 = new ScrollingImagePanel(rndImg1, 100, 100);
 ```
 
-In this example, the image source is a TIFF image. A TIFF `RenderedOp`
-is created as a source for the subsequent operations:
+In this example, the image source is a TIFF image. An `ImageRead`
+`RenderedOp` is created as a source for the subsequent operations:
 
 ```java
   RenderedOp sourceImg = 
-            ImageN.create("TIFF", pb0);
+            ImageN.create("ImageRead", pb0);
 ```
 
 The rendered source image is then converted to a renderable image:
@@ -335,7 +336,7 @@ other objects that the operator may require.
 
 ```java
   ParameterBlock pb1 = new ParameterBlock();
-  pb1.addSource(sourceImage);
+  pb1.addSource(ren);
 ```
 
 An \"invert\" `RenderableOp` is then created with the TIFF image as
@@ -665,7 +666,7 @@ as:
 
 -   `ScaleOpImage` - for extension operators that perform image
     scaling requiring rectilinear backwards mapping and padding by the
-    resampling filter dimensions``
+    resampling filter dimensions
 
 The `OpImage` is able to determine what source areas are sufficient
 for the computation of a given area of the destination by means of a
@@ -767,7 +768,7 @@ include:
 
 -   [Statistical Operators](#367-statistical-operators)
 
--   [Edge Extraction Operators](#368-edge-extraction-operations)
+-   [Edge Extraction Operators](#368-edge-extraction-operators)
 
 -   [Miscellaneous Operators](#369-miscellaneous-operators)
 
@@ -1124,7 +1125,7 @@ image. [Table 3-7](#table-3-7) lists the statistical operators.
 
 <a name="table-3-7"></a> **Table 3-7 Statistical Operators**
 
-------------------------------------------------------------------------- 
+-------------------------------------------------------------------------
 
 Extrema
 : Takes one rendered source image, scans a specific region of the image, and finds the maximum and minimum pixel values for each band within that region of the image. The image data pass through this operation unchanged.                                                                                                                                                                                                                                                            
@@ -1203,10 +1204,10 @@ For example:
 The `ImageN.createRenderable` method creates a renderable node operation
 that takes two parameters:
 
--   An operation name (see [Section 3.7.1, \"Operation Name\"](#section-3.7.1-operation-name) )
+-   An operation name (see [Section 3.7.1, \"Operation Name\"](#371-operation-name) )
 
 -   A source and a set of parameters for the operation contained in a
-    parameter block (see [Section 3.7.2, \"Parameter Blocks\"](#section-3.7.2-parameter-blocks) )
+    parameter block (see [Section 3.7.2, \"Parameter Blocks\"](#372-parameter-blocks) )
 
 
 ##### For a rendered graph:
@@ -1245,7 +1246,7 @@ numbers of sources and parameters directly.
 
 Two versions of the `create` method are non-static and are identified
 as `createNS`. These methods may be used with a specific instance of
-the `JAI` class and should only be used when the final result returned
+the `ImageN` class and should only be used when the final result returned
 is a single `RenderedImage`. However, the source (or sources) supplied
 may be a collection of images or a collection of collections.
 
@@ -1259,11 +1260,11 @@ These call the non-static methods:
 The following is an example of one of these methods:
 
 ```java
-  RenderedOp im = ImageN.createNS("operationName", source, param1,
-                             param2)
+  RenderedOp im = ImageN.getDefaultInstance().createNS("operationName",
+                             parameterBlock, hints);
 ```
 
-The rendering hints associated with this instance of `JAI` are
+The rendering hints associated with this instance of `ImageN` are
 overlaid with the hints passed to this method. That is, the set of
 keys will be the union of the keys from the instance\'s hints and the
 hints parameter. If the same key exists in both places, the value from
@@ -1376,7 +1377,7 @@ As described before, there are two separate classes for specifying
 parameter blocks: `ParameterBlock` and `ParameterBlockImageN`. Both
 classes work very much alike, except for two differences:
 `ParameterBlockImageN` automatically provides default parameter values
-and allows setting parameters by name; `ParameterBlock` does not.``
+and allows setting parameters by name; `ParameterBlock` does not.
 
 
 ##### ParameterBlock
@@ -1394,7 +1395,7 @@ created in the previous example.
 The `add()` method can be used with all of the supported data types:
 byte, short, integer, long, float, and double. When using the
 `ParameterBlock` object, all parameters that an operation requires
-must be added, else the operation will fail.``
+must be added, else the operation will fail.
 
 **API:** `java.awt.image.renderable.ParameterBlock`
 
@@ -1416,19 +1417,17 @@ must be added, else the operation will fail.``
 
 Since the `ParameterBlockImageN` object already contains default values
 for the parameters at the time of construction, the parameters must be
-changed (or set) with the `ParameterBlockImageN.set(value, index)`
-methods rather than the `add()` method. The `add()` methods should not
-be used since the parameter list is already long enough to hold all of
-the parameters required by the `OperationDescriptor`.
+changed (or set) with the `setParameter(paramName, value)` or
+`set(value, index)` methods. The `add()` methods are deprecated and
+throw an `IllegalStateException`, since the parameter list already
+holds all of the parameters required by the `OperationDescriptor`.
 
-[Listing 3-3](../programming-environ) shows the creation
-of a `ParameterBlockImageN` intended to be passed to a rotate operation.
-The rotate operation takes four parameters: `xOrigin`, `yOrigin`,
-`angle`, and `interpolation`. The default values for `xOrigin` and
-`yOrigin` are 0.0F (for both). In this example, these two values are
-not set, as the default values are sufficient for the operation. The
-other two parameters (`angle` and `interpolation`) have default values
-of `null` and must therefore be set. The source image must also be
+[Listing 3-3](#listing-3-3) shows the creation
+of a `ParameterBlockImageN` intended to be passed to a scale operation.
+The scale operation takes parameters including `xScale`, `yScale`,
+`xTrans`, `yTrans`, and `interpolation`. In this example only
+`xScale`, `yScale` and `interpolation` are set, as the default values
+are sufficient for the other parameters. The source image must also be
 specified.
 
 <a name="listing-3-3"></a>
@@ -1437,33 +1436,53 @@ specified.
 
 ```java
   // Specify the interpolation method to be used
-  interp = Interpolation.create(Interpolation.INTERP_NEAREST);
+  Interpolation interp = Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
 
   // Create the ParameterBlockImageN and add the interpolation to it
-  ParameterBlockImageN pb = new ParameterBlockImageN();
-  pb.addSource(im);                 // The source image
-  pb.set(1.2F, "angle");            // The rotation angle in radians
-  pb.set(interp, "interpolation");  // The interpolation method
+  ParameterBlockImageN pb = new ParameterBlockImageN("Scale");
+  pb.addSource(im);                          // The source image
+  pb.setParameter("xScale", 2.0F);           // The x scale factor
+  pb.setParameter("yScale", 2.0F);           // The y scale factor
+  pb.setParameter("interpolation", interp);  // The interpolation method
+```
+
+The `ParameterBlockImageN` methods return the parameter block, allowing
+method calls to be chained:
+
+```java
+  RenderedOp scaled = ImageN.create("Scale",
+          new ParameterBlockImageN("Scale")
+                  .addSource(im)
+                  .setParameter("xScale", 2.0F)
+                  .setParameter("yScale", 2.0F)
+                  .setParameter("interpolation", interp));
 ```
 
 **API:** `org.eclipse.imagen.ParameterBlockImageN`
 
+* `ParameterBlockImageN addSource(Object source)`
 
-* `ParameterBlock set(byte b, String paramName)`
+* `ParameterBlockImageN setSource(String sourceName, Object source)`
 
-* `ParameterBlock set(char c, String paramName)`
+* `ParameterBlockImageN setParameter(String paramName, byte b)`
 
-* `ParameterBlock set(int i, String paramName)`
+* `ParameterBlockImageN setParameter(String paramName, boolean b)`
 
-* `ParameterBlock set(short s, String paramName)`
+* `ParameterBlockImageN setParameter(String paramName, char c)`
 
-* `ParameterBlock set(long l, String paramName)`
+* `ParameterBlockImageN setParameter(String paramName, short s)`
 
-* `ParameterBlock set(float f, String paramName)`
+* `ParameterBlockImageN setParameter(String paramName, int i)`
 
-* `ParameterBlock set(double d, String paramName)`
+* `ParameterBlockImageN setParameter(String paramName, long l)`
 
-* `ParameterBlock set(java.lang.Object obj, String paramName)`
+* `ParameterBlockImageN setParameter(String paramName, float f)`
+
+* `ParameterBlockImageN setParameter(String paramName, double d)`
+
+* `ParameterBlockImageN setParameter(String paramName, Object obj)`
+
+* `ParameterBlockImageN set(Object obj, int index)`
 
 ### 3.7.3 Rendering Hints
 
@@ -1698,19 +1717,16 @@ destination opimage is set to 200 x 200.
 
 ```java
   // Create the parameter block for the scale operation.
-  ParameterBlock pb = new ParameterBlock();
-      pb.addSource(im0);      // The source image
-      pb.add(4.0F);           // The x scale factor
-      pb.add(4.0F);           // The y scale factor
-      pb.add(interp);         // The interpolation method
+  ParameterBlockImageN pb = new ParameterBlockImageN("Scale")
+          .addSource(im0)                          // The source image
+          .setParameter("xScale", 4.0F)            // The x scale factor
+          .setParameter("yScale", 4.0F)            // The y scale factor
+          .setParameter("interpolation", interp);  // The interpolation method
 
   // Specify the rendering hints.
-      layout = new ImageLayout();
-      layout.setMinX(200);
-      layout.setMinY(200);
-      RenderingHints rh =
-              new RenderingHints(JAI.KEY_IMAGE_LAYOUT, layout);
+  ImageLayout layout = new ImageLayout().setMinX(200).setMinY(200);
+  RenderingHints rh = new RenderingHints(ImageN.KEY_IMAGE_LAYOUT, layout);
 
   // Create the scale operation.
-  PlanarImage im2 = (PlanarImage)ImageN.create("scale", pb, layout)
+  RenderedOp im2 = ImageN.create("Scale", pb, rh);
 ```

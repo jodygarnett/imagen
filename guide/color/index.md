@@ -324,7 +324,7 @@ appropriate \"to\" and \"from\" conversion methods are implemented.
 However, most developers can simply use the default `sRGB` color space
 or color spaces that are represented by commonly-available ICC
 profiles, such as profiles for monitors and printers or profiles
-embedded in image data.``
+embedded in image data.
 
 The `ICC_ColorSpace` class is based on ICC profile data as represented
 by the `ICC_Profile` class. The `ICC_Profile` class is a
@@ -401,7 +401,7 @@ The `ColorConvert` operation takes one parameter:
 
 | Parameters | Type | Description |
 |------------|------|-------------|
-| colorSpace | ColorSpace | The destination color space. |
+| colorModel | ColorModel | The destination color model. |
 
 For information on color space, see [Section 5.2.2, \"Color
 Space](#color-space).\"
@@ -416,7 +416,7 @@ RenderedOp src = ImageN.create("fileload", fileName);
 
 // Create the ParameterBlock.
 ParameterBlock pb = new ParameterBlock();
-pb.addSource(src).add(colorSpace);
+pb.addSource(src).add(colorModel);
 
 // Perform the color conversion.
 RenderedOp dst = ImageN.create("ColorConvert", pb);
@@ -469,7 +469,7 @@ clamped to the minimum or maximum value, respectively.
 
 [Listing 5-2](#listing-5-2) shows a code sample for a `BandCombine` operation.
 
-***Listing 5-2*  Example BandCombine Operation** <a name="listing-5-1"></a>
+***Listing 5-2*  Example BandCombine Operation** <a name="listing-5-2"></a>
 
 ```java
 // Create the matrix.
@@ -481,21 +481,21 @@ clamped to the minimum or maximum value, respectively.
              };
 
 // Identity.
-     double[][] matrix = {
+     double[][] identity = {
                 { 1.0D, 0.0D, 0.0D, 0.0D },
                 { 0.0D, 1.0D, 0.0D, 0.0D },
                 { 0.0D, 0.0D, 1.0D, 0.0D },
              };
 
 // Luminance stored into red band (3 band).
-      double[][] matrix = {
+      double[][] luminance3 = {
                  { .114D, 0.587D, 0.299D, 0.0D },
                  { .000D, 0.000D, 0.000D, 0.0D },
                  { .000D, 0.000D, 0.000D, 0.0D }
               };
 
 // Luminance (single band output).
-      double[][] matrix = {
+      double[][] luminance1 = {
                  { .114D, 0.587D, 0.299D, 0.0D }
               };
 
